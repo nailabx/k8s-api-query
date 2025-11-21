@@ -1,0 +1,67 @@
+##################################
+# Go Build Artifacts
+##################################
+bin/
+build/
+dist/
+
+# Go test output
+*.out
+
+# Executables (general)
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go cache directories
+/.cache
+/go-cache
+
+# If you vendor dependencies
+/vendor/
+
+##################################
+# Editor / IDE
+##################################
+.vscode/
+.idea/
+*.swp
+
+##################################
+# OS files
+##################################
+.DS_Store
+Thumbs.db
+
+##################################
+# Logs
+##################################
+*.log
+logs/
+
+##################################
+# Kubernetes
+##################################
+# Local kubeconfig backups
+.kube/
+
+# kubectl plugin cache
+.kubectl/
+
+# Helm artifacts
+helm-release.yaml
+helm-debug.log
+chart.tgz
+
+##################################
+# Docker
+##################################
+# Docker build artifacts
+*.tar
+docker-cache/
+
+##################################
+# Environment files
+##########################
+.env
