@@ -59,7 +59,7 @@ spec:
 
       containers:
       - name: k8s-api-query
-        image: quay.io/nailabx/k8s-api-query:1.0.0
+        image: quay.io/nailabx/k8s-api-query:latest # change this to use the tag want
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

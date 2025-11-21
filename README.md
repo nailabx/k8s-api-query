@@ -38,8 +38,13 @@ You need:
 - A Deployment that runs the container image
 - A Service exposing port 8080
 
-Container image:
-quay.io/nailabx/k8s-api-query:<version>
+The repository already contains a working set of manifests (`manifest/`) that provision all of the above. Apply them directly to your cluster:
+
+```bash
+kubectl apply -f manifest/
+```
+
+The deployment pulls `quay.io/nailabx/k8s-api-query:<version>` by default, so ensure the desired version tag exists in the registry before applying.
 
 ---
 
