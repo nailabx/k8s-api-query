@@ -13,8 +13,9 @@ APP_NAME := k8s-api-query
 REGISTRY := quay.io/nailabx
 IMAGE := $(REGISTRY)/$(APP_NAME)
 
+# Versioning
 GIT_SHA := $(shell git rev-parse --short HEAD)
-VERSION ?= $(GIT_SHA)
+VERSION ?= 0.0.0  # override with: make docker-release VERSION=1.3.0
 
 ###############################################
 # Go Build
@@ -28,22 +29,32 @@ test:
 	go test ./... -v
 
 ###############################################
-# Docker steps
+# Docker
 ###############################################
 docker-login:
 	@echo ">> Logging in to $(QUAY_REGISTRY)..."
 	echo "$(QUAY_PASSWORD)" | docker login $(QUAY_REGISTRY) -u "$(QUAY_USERNAME)" --password-stdin
 
 docker-build: build
-	@echo ">> Building Docker image $(IMAGE):$(VERSION)"
-	docker build -t $(IMAGE):$(VERSION) .
+	@echo ">> Building Docker image $(IMAGE)"
+	@echo "   - Tagging: $(VERSION)"
+	@echo "   - Tagging: $(GIT_SHA)"
+	@echo "   - Tagging: latest"
+	docker build -t $(IMAGE):$(VERSION) \
+	             -t $(IMAGE):$(GIT_SHA) \
+	             -t $(IMAGE):latest .
 
 docker-push: docker-login
-	@echo ">> Pushing $(IMAGE):$(VERSION)"
+	@echo ">> Pushing Docker images..."
 	docker push $(IMAGE):$(VERSION)
+	docker push $(IMAGE):$(GIT_SHA)
+	docker push $(IMAGE):latest
 
 docker-release: docker-build docker-push
-	@echo ">> Image published: $(IMAGE):$(VERSION)"
+	@echo ">> Published tags:"
+	@echo "   ✔ $(VERSION)"
+	@echo "   ✔ $(GIT_SHA)"
+	@echo "   ✔ latest"
 
 ###############################################
 # Utility
