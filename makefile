@@ -1,41 +1,62 @@
-# ---- CONFIG ----
+###############################################
+# Load .env variables if present
+###############################################
+ifneq (,$(wildcard .env))
+    include .env
+    export $(shell sed 's/=.*//' .env)
+endif
+
+###############################################
+# Project configuration
+###############################################
 APP_NAME := k8s-api-query
 REGISTRY := quay.io/nailabx
 IMAGE := $(REGISTRY)/$(APP_NAME)
 
-# Git SHA for tagging
 GIT_SHA := $(shell git rev-parse --short HEAD)
-
-# Default version (override with: make build VERSION=1.2.3)
 VERSION ?= $(GIT_SHA)
 
-# ---- GO BUILD ----
+###############################################
+# Go Build
+###############################################
 build:
 	@echo ">> Building Go binary..."
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/$(APP_NAME) main.go
 
 test:
-	@echo ">> Running unit tests..."
+	@echo ">> Running tests..."
 	go test ./... -v
 
-# ---- DOCKER ----
+###############################################
+# Docker steps
+###############################################
+docker-login:
+	@echo ">> Logging in to $(QUAY_REGISTRY)..."
+	echo "$(QUAY_PASSWORD)" | docker login $(QUAY_REGISTRY) -u "$(QUAY_USERNAME)" --password-stdin
+
 docker-build: build
-	@echo ">> Building Docker image: $(IMAGE):$(VERSION)"
+	@echo ">> Building Docker image $(IMAGE):$(VERSION)"
 	docker build -t $(IMAGE):$(VERSION) .
 
-docker-push:
-	@echo ">> Pushing Docker image to registry..."
+docker-push: docker-login
+	@echo ">> Pushing $(IMAGE):$(VERSION)"
 	docker push $(IMAGE):$(VERSION)
 
-# Combine build + push
 docker-release: docker-build docker-push
 	@echo ">> Image published: $(IMAGE):$(VERSION)"
 
-# ---- UTIL ----
+###############################################
+# Utility
+###############################################
 clean:
 	rm -rf bin/
 
-# ---- FULL PIPELINE ----
+###############################################
+# Full pipeline
+###############################################
 all: test docker-release
 
-.PHONY: build test docker-build docker-push docker-release clean all
+###############################################
+# PHONY
+###############################################
+.PHONY: build test docker-build docker-push docker-release clean all docker-login
