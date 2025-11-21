@@ -59,14 +59,14 @@ spec:
 
       containers:
       - name: k8s-api-query
-        image: quay.io/nailabx/k8s-api-query:0.0.1
+        image: quay.io/nailabx/k8s-api-query:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
 
         volumeMounts:
         - name: shortlived-token
-          mountPath: /var/run/secrets/tokens
+          mountPath: /var/run/secrets/tokens # do not overwrite default SA token path
           readOnly: true
 
 ---

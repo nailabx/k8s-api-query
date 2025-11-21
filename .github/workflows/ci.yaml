@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -25,8 +27,18 @@ jobs:
     - name: Go Test
       run: go test ./...
 
+    - name: Generate Semantic Version
+      id: semver
+      if: github.event_name == 'push'
+      uses: mathieudutour/github-tag-action@v6.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        default_bump: patch
+        release_branches: main
+
     - name: Login to Quay.io
       uses: docker/login-action@v3
+      if: github.event_name == 'push'
       with:
         registry: quay.io
         username: ${{ secrets.QUAY_USERNAME }}
@@ -34,9 +46,11 @@ jobs:
 
     - name: Build & Push Image
       uses: docker/build-push-action@v5
+      if: github.event_name == 'push'
       with:
         context: .
         push: true
         tags: |
           quay.io/nailabx/k8s-api-query:latest
           quay.io/nailabx/k8s-api-query:${{ github.sha }}
+          quay.io/nailabx/k8s-api-query:${{ steps.semver.outputs.new_tag }}
